@@ -27,7 +27,7 @@ func RegisterRecordHandlers(ctx context.Context, db *db.Postgres) {
 			http.Error(w, "Unable to get record "+recordId, http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprint(w, record)
+		fmt.Fprint(w, *record)
 	}
 
 	createRecord := func(w http.ResponseWriter, r *http.Request) {

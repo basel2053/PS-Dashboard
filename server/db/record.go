@@ -11,7 +11,9 @@ import (
 func (pg *Postgres) FindRecords(ctx context.Context, filter interface{}) ([]ps.Record, error) {
 	query := "SELECT * FROM record"
 	rows, _ := pg.db.Query(ctx, query)
-	records, err := pgx.CollectRows(rows, pgx.RowTo[ps.Record])
+	// NOTE: with many returned records may take alot of memory so you may switch
+	// to using cursor way of fetching data row by row and sending to channel
+	records, err := pgx.CollectRows(rows, pgx.RowToStructByName[ps.Record])
 	if err != nil {
 		return nil, err
 	}
@@ -23,8 +25,8 @@ func (pg *Postgres) FindRecordById(ctx context.Context, id string) (*ps.Record, 
 	args := pgx.NamedArgs{
 		"id": id,
 	}
-	var record *ps.Record
-	err := pg.db.QueryRow(ctx, query, args).Scan(record)
+	rows, _ := pg.db.Query(ctx, query, args)
+	record, err := pgx.CollectOneRow(rows, pgx.RowToAddrOfStructByName[ps.Record])
 	if err != nil {
 		return nil, fmt.Errorf("unable to scan row: %w", err)
 	}
