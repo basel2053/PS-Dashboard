@@ -12,7 +12,8 @@ import (
 )
 
 func main() {
-	dbpool, err := db.NewPG(context.Background())
+	ctx := context.Background()
+	dbpool, err := db.NewPG(ctx)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
 		os.Exit(1)
@@ -20,7 +21,10 @@ func main() {
 	defer dbpool.Close()
 
 	listenAddr := flag.String("listenaddr", os.Getenv("PORT"), "Server port")
+
+	api.RegisterRecordHandlers(ctx, dbpool)
 	http.HandleFunc("/", api.RootHandler)
+
 	fmt.Printf("Server is up on running on http://localhost%s\n", *listenAddr)
 	err = http.ListenAndServe(*listenAddr, nil)
 	log.Fatal(err)
