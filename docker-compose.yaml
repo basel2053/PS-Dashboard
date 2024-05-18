@@ -22,6 +22,7 @@ services:
     restart: always
     environment:
       PORT: :5000
+      DB_URL: postgres://postgres:pspg@db:5432/scoreboard
 
   db:
     image: postgres:16.3
